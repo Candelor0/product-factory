@@ -45,6 +45,7 @@ export function CodingPanel({
   projectId,
   planRunId,
   disabled,
+  refreshKey = 0,
   onGenerate,
   onBuild,
   onCheckRuntime,
@@ -54,6 +55,7 @@ export function CodingPanel({
   projectId: string;
   planRunId: string | null;
   disabled: boolean;
+  refreshKey?: number;
   onGenerate: (input: CodingRequest) => Promise<CodingState | undefined>;
   onBuild: (input: BuildRequest) => Promise<BuildResult | undefined>;
   onCheckRuntime: (input: RuntimeCheckRequest) => Promise<RuntimeReport | undefined>;
@@ -85,6 +87,12 @@ export function CodingPanel({
   }, [projectId]);
 
   useEffect(() => {
+    fileGeneration.current++;
+    setFile(null);
+    setReading(false);
+  }, [projectId, refreshKey]);
+
+  useEffect(() => {
     const current = ++generation.current;
     let timer: ReturnType<typeof setTimeout> | undefined;
     const read = async () => {
@@ -106,7 +114,7 @@ export function CodingPanel({
       fileGeneration.current++;
       clearTimeout(timer);
     };
-  }, [projectId, creating, refresh]);
+  }, [projectId, creating, refresh, refreshKey]);
 
   const generate = async () => {
     if (locked.current || disabled || recovering || exporting || !planRunId || !state) return;

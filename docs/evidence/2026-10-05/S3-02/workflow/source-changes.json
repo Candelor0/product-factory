@@ -1,0 +1,31 @@
+{
+  "baseline": "0.16.0",
+  "version": "0.17.0",
+  "modified": [
+    "package-lock.json",
+    "package.json",
+    "src/main/app.ts",
+    "src/main/coding-runner.ts",
+    "src/main/preload.ts",
+    "src/main/repair-runner.ts",
+    "src/renderer/App.tsx",
+    "src/renderer/CodingPanel.tsx",
+    "src/renderer/GapReportPanel.tsx",
+    "src/renderer/PlanPanel.tsx",
+    "src/renderer/api.ts",
+    "src/shared/contracts.ts",
+    "tests/coding-runner.test.ts"
+  ],
+  "added": [
+    "scripts/workflow-smoke.mjs",
+    "src/main/workflow-runner.ts",
+    "src/main/workflow-store.ts",
+    "src/renderer/WorkflowPanel.tsx",
+    "src/renderer/workflow.css",
+    "src/shared/workflow-contracts.ts",
+    "tests/workflow-electron-smoke.ts",
+    "tests/workflow-runner.test.ts",
+    "tests/workflow-store.test.ts"
+  ],
+  "removed": []
+}

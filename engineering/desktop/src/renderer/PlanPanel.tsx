@@ -7,6 +7,9 @@ import { CodingPanel } from './CodingPanel';
 import { AppAiPanel } from './AppAiPanel';
 import { DataBackupPanel } from './DataBackupPanel';
 import { DataMigrationPanel } from './DataMigrationPanel';
+import { GapReportPanel } from './GapReportPanel';
+import { WorkflowPanel } from './WorkflowPanel';
+import type { WorkflowRequest, WorkflowState } from '../shared/workflow-contracts';
 import type { CodingRequest, CodingState } from '../shared/coding-contracts';
 import type { BuildRequest, BuildResult } from '../shared/build-contracts';
 import type { RepairRequest, RepairState } from '../shared/repair-contracts';
@@ -33,6 +36,7 @@ export function PlanPanel({
   onRequirements,
   onDesign,
   onGenerate,
+  onWorkflow,
   onBuild,
   onCheckRuntime,
   onOpenApplication,
@@ -43,6 +47,7 @@ export function PlanPanel({
   onRequirements: () => void;
   onDesign: () => void;
   onGenerate: (input: CodingRequest) => Promise<CodingState | undefined>;
+  onWorkflow: (input: WorkflowRequest, reconcile?: boolean) => Promise<WorkflowState | undefined>;
   onBuild: (input: BuildRequest) => Promise<BuildResult | undefined>;
   onCheckRuntime: (input: RuntimeCheckRequest) => Promise<RuntimeReport | undefined>;
   onOpenApplication: (input: {
@@ -65,6 +70,9 @@ export function PlanPanel({
   const [appAiWorking, setAppAiWorking] = useState(false);
   const [dataBackupWorking, setDataBackupWorking] = useState(false);
   const [dataMigrationWorking, setDataMigrationWorking] = useState(false);
+  const [gapWorking, setGapWorking] = useState(false);
+  const [workflowWorking, setWorkflowWorking] = useState(false);
+  const [workflowRefresh, setWorkflowRefresh] = useState(0);
   const [readError, setReadError] = useState('');
   const [actionError, setActionError] = useState('');
   const [readAttempt, setReadAttempt] = useState(0);
@@ -121,6 +129,8 @@ export function PlanPanel({
       appAiWorking ||
       dataBackupWorking ||
       dataMigrationWorking ||
+      gapWorking ||
+      workflowWorking ||
       project.archived ||
       loading ||
       readError ||
@@ -181,7 +191,14 @@ export function PlanPanel({
       run.request.designId !== design?.id)
   );
   const busy =
-    disabled || loading || creating || appAiWorking || dataBackupWorking || dataMigrationWorking;
+    disabled ||
+    loading ||
+    creating ||
+    appAiWorking ||
+    dataBackupWorking ||
+    dataMigrationWorking ||
+    gapWorking ||
+    workflowWorking;
   const status = loading ? 'loading' : readError ? 'error' : stale ? 'stale' : state?.status;
   const statusLabel = loading
     ? '正在读取'
@@ -225,37 +242,92 @@ export function PlanPanel({
             ? `依据需求 v${requirement?.version} · 页面 v${design?.version}，使用本地规则整理，不调用模型。`
             : '确认需求和页面方向后，即可整理清单。'}
       </p>
-      <p className="plan-execution-note">任务待开发，验收未运行。</p>
+      <p className="plan-execution-note">
+        计划列出目标；差距报告分别记录源码线索、技术检查与用户核验。
+      </p>
+      <WorkflowPanel
+        key={`workflow:${project.id}`}
+        projectId={project.id}
+        planRunId={run && !stale && confirmed ? run.id : null}
+        disabled={
+          disabled ||
+          loading ||
+          creating ||
+          project.archived ||
+          appAiWorking ||
+          dataBackupWorking ||
+          dataMigrationWorking ||
+          gapWorking
+        }
+        onRun={onWorkflow}
+        onWorkingChange={setWorkflowWorking}
+        onSettled={() => setWorkflowRefresh((value) => value + 1)}
+      />
       <CodingPanel
         projectId={project.id}
         planRunId={run && !stale && confirmed ? run.id : null}
         disabled={busy || project.archived}
+        refreshKey={workflowRefresh}
         onGenerate={onGenerate}
         onBuild={onBuild}
         onCheckRuntime={onCheckRuntime}
         onOpenApplication={onOpenApplication}
         onRepair={onRepair}
       />
+      <GapReportPanel
+        key={`gap:${project.id}`}
+        projectId={project.id}
+        planRunId={run?.id ?? null}
+        archived={project.archived}
+        disabled={
+          disabled ||
+          loading ||
+          creating ||
+          appAiWorking ||
+          dataBackupWorking ||
+          dataMigrationWorking ||
+          workflowWorking
+        }
+        refreshKey={workflowRefresh}
+        onWorkingChange={setGapWorking}
+      />
       <AppAiPanel
         key={`app-ai:${project.id}`}
         projectId={project.id}
         planRunId={run && !stale && confirmed ? run.id : null}
         archived={project.archived}
-        disabled={disabled || loading || creating || dataBackupWorking || dataMigrationWorking}
+        disabled={
+          disabled ||
+          loading ||
+          creating ||
+          dataBackupWorking ||
+          dataMigrationWorking ||
+          gapWorking ||
+          workflowWorking
+        }
         onWorkingChange={setAppAiWorking}
       />
       <DataBackupPanel
         key={`data-backup:${project.id}`}
         projectId={project.id}
         archived={project.archived}
-        disabled={disabled || creating || appAiWorking || dataMigrationWorking}
+        disabled={
+          disabled ||
+          creating ||
+          appAiWorking ||
+          dataMigrationWorking ||
+          gapWorking ||
+          workflowWorking
+        }
         onWorkingChange={setDataBackupWorking}
       />
       <DataMigrationPanel
         key={`data-migration:${project.id}`}
         projectId={project.id}
         archived={project.archived}
-        disabled={disabled || creating || appAiWorking || dataBackupWorking}
+        disabled={
+          disabled || creating || appAiWorking || dataBackupWorking || gapWorking || workflowWorking
+        }
         onWorkingChange={setDataMigrationWorking}
       />
 

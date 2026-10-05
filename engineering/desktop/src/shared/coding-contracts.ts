@@ -4,6 +4,17 @@ export interface CodingRequest {
   projectId: string;
   planRunId: string;
 }
+/** Internal workflow input. The standalone generateSource IPC accepts v1 only. */
+export interface ModificationCodingRequest {
+  schemaVersion: 2;
+  requestId: string;
+  projectId: string;
+  planRunId: string;
+  sourceRevision: number;
+  sourceHash: string;
+  instruction: string;
+}
+export type CodingExecutionRequest = CodingRequest | ModificationCodingRequest;
 export type CodingStatus =
   'running' | 'draft_saved' | 'no_changes' | 'cancelled' | 'failed' | 'limited' | 'interrupted';
 /** Metadata only: never persist model messages, tool arguments, or credentials here. */

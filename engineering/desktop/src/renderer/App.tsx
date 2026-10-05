@@ -47,7 +47,7 @@ const stages: { id: Stage; label: string; caption: string }[] = [
   { id: 'idea', label: '描述想法', caption: '说说你想做什么' },
   { id: 'requirements', label: '确认需求', caption: '一起把方向想清楚' },
   { id: 'design', label: '确认页面', caption: '看看作品的样子' },
-  { id: 'ready', label: '方向已确认', caption: '开发引擎待接入' },
+  { id: 'ready', label: '方向已确认', caption: '可整理计划并开发' },
 ];
 const emptyRequirements: RequirementContent = {
   summary: '',
@@ -532,7 +532,7 @@ export default function App() {
                         run(
                           '正在确认页面方向',
                           () => api.approveDesign({ projectId: project.id, revisionId }),
-                          '页面方向已确认。自动开发引擎仍在建设中。',
+                          '页面方向已确认。前往开发计划，整理后可开始自动开发。',
                         )
                       }
                     />
@@ -545,6 +545,20 @@ export default function App() {
                       disabled={!!busy}
                       onRequirements={() => setTab('requirements')}
                       onDesign={() => setTab('design')}
+                      onWorkflow={(input, reconcile) =>
+                        run(
+                          reconcile
+                            ? '正在核对自动开发记录'
+                            : input.mode === 'generate'
+                              ? '正在自动开发'
+                              : input.mode === 'modify'
+                                ? '正在修改并检查'
+                                : '正在检查已有源码并继续',
+                          () => api.runWorkflow(input),
+                          undefined,
+                          true,
+                        )
+                      }
                       onGenerate={(input) =>
                         run('正在生成源码草稿', () => api.generateSource(input), undefined, true)
                       }
@@ -655,7 +669,7 @@ export default function App() {
         <Modal title="使用指南" onClose={() => setHelp(false)}>
           <div className="guide-content">
             <p>
-              产品工厂是你的本地创作工作台。现在可以保存项目、连接模型，整理需求和确认页面方向。
+              产品工厂是你的本地创作工作台。从想法开始，确认需求和页面方向，再开发、检查和调整应用。
             </p>
             <ol>
               <li>
@@ -670,11 +684,23 @@ export default function App() {
                 <strong>确认需求与页面</strong>
                 <p>审阅 AI 整理的内容，可以直接修改、补充。确认后会保存对应版本。</p>
               </li>
+              <li>
+                <strong>整理计划并自动开发</strong>
+                <p>
+                  前往「开发计划」，先整理任务，再点击「自动开发」。确认方向和整理计划不会自动调用模型开发。
+                </p>
+              </li>
+              <li>
+                <strong>核验功能并继续调整</strong>
+                <p>
+                  启动检查通过后，打开本地应用实际操作，在差距报告记录结果。已有应用可用文字描述修改要求。
+                </p>
+              </li>
             </ol>
             <div className="info-strip">
               <Code2 size={18} />
               <span>
-                确认方向后，可在开发计划中生成源码并构建预览。构建失败时，可调用模型自动修复。
+                自动开发和修改可能产生模型费用。编译与启动检查不能代替业务核验；本地应用是否保存内容取决于生成的功能。
               </span>
             </div>
           </div>
@@ -914,13 +940,14 @@ function Requirements({
                 保存修改
               </Button>
               {revision.approvedAt && !dirty ? (
-                <Button className="primary" onClick={onNext}>
+                <Button className="primary" data-testid="requirements-design-next" onClick={onNext}>
                   查看页面方向
                   <ArrowRight size={15} />
                 </Button>
               ) : (
                 <Button
                   className="primary"
+                  data-testid="approve-requirements"
                   disabled={locked || dirty}
                   title={dirty ? '请先保存修改，再确认当前版本' : undefined}
                   onClick={() => void onApprove(revision.id)}
@@ -1074,9 +1101,14 @@ function Design({
               </span>
               <div>
                 <h3>方向已确认</h3>
-                <p>整理开发计划后，即可生成源码草稿。</p>
-                <Button className="compact" disabled={busy} onClick={onPlan}>
-                  查看开发计划 <ArrowRight size={14} />
+                <p>先整理开发计划，再点击「自动开发」生成和检查应用。</p>
+                <Button
+                  className="primary compact"
+                  data-testid="design-plan-next"
+                  disabled={busy}
+                  onClick={onPlan}
+                >
+                  前往开发计划 <ArrowRight size={14} />
                 </Button>
               </div>
             </div>
@@ -1085,6 +1117,7 @@ function Design({
               <span>确认代表你认可这版方向草案</span>
               <Button
                 className="primary"
+                data-testid="approve-design"
                 disabled={busy || project.archived}
                 onClick={() => void onApprove(revision.id)}
               >

@@ -89,6 +89,17 @@ export interface BlogRuntimeStatus {
   templateId: 'blog-sample-v1';
 }
 export interface FactoryApi {
+  workflowState(input: {
+    projectId: string;
+    requestId?: string;
+  }): Promise<ApiResult<import('./workflow-contracts').WorkflowState>>;
+  runWorkflow(
+    input: import('./workflow-contracts').WorkflowRequest,
+  ): Promise<ApiResult<import('./workflow-contracts').WorkflowState>>;
+  gapReport(input: { projectId: string }): Promise<ApiResult<import('./gap-contracts').GapReport>>;
+  recordGapEvidence(
+    input: import('./gap-contracts').GapEvidenceRequest,
+  ): Promise<ApiResult<import('./gap-contracts').GapReport>>;
   dataMigrationState(
     input: import('./data-migration-contracts').DataMigrationRequest,
   ): Promise<ApiResult<import('./data-migration-contracts').DataMigrationState>>;

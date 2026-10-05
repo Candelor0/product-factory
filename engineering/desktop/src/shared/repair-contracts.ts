@@ -1,6 +1,17 @@
 import type { BuildDiagnostic, BuildRequest } from './build-contracts';
 
 export type RepairRequest = BuildRequest & { runtimeReportId?: string };
+/** Internal workflow request only. The child journal persists its hash, never this text. */
+export type ModificationRepairRequest = Omit<RepairRequest, 'schemaVersion'> & {
+  schemaVersion: 2;
+  modification: {
+    workflowId: string;
+    sourceRevision: number;
+    sourceHash: string;
+    instruction: string;
+  };
+};
+export type RepairExecutionRequest = RepairRequest | ModificationRepairRequest;
 export type RepairStatus =
   'running' | 'succeeded' | 'limited' | 'no_progress' | 'cancelled' | 'failed' | 'interrupted';
 /** Metadata and fixed compiler diagnostics only; never raw model messages or credentials. */

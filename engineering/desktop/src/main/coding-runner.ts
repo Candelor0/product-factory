@@ -1,14 +1,16 @@
 import { createHash } from 'node:crypto';
 import { isDeepStrictEqual } from 'node:util';
 import { setImmediate } from 'node:timers/promises';
-import type { CodingRequest, CodingRun, CodingState } from '../shared/coding-contracts';
+import type { CodingExecutionRequest, CodingRun, CodingState } from '../shared/coding-contracts';
 import type { ModelMessage } from '../shared/model-tool-contracts';
 import type { SourceToolResponse } from '../shared/source-contracts';
 import type { ModelService } from './model-service';
 import { CodingStore } from './coding-store';
 import { SourceStore } from './source-store';
 import { SourceToolExecutor } from './source-tools';
-import { codingPrompt, codingTools } from './coding-tool-schema';
+import { codingPrompt, codingTools, modificationPrompt } from './coding-tool-schema';
+import { assertExportContentsSafe } from './export-security';
+import { parseModificationInstruction } from './modification-protocol';
 import {
   AppError,
   assertFields,
@@ -16,7 +18,12 @@ import {
   parseProjectId,
   parseRevisionId,
 } from './validation';
-import { parseSourcePath } from './source-protocol';
+import {
+  parseSourceHash,
+  parseSourcePath,
+  parseSourceRevision,
+  parseSourceToolRequest,
+} from './source-protocol';
 
 const recoverable = new Set([
   'INVALID_INPUT',
@@ -24,6 +31,7 @@ const recoverable = new Set([
   'SOURCE_PATH_DENIED',
   'SOURCE_NOT_FOUND',
   'SOURCE_CONFLICT',
+  'SOURCE_READ_REQUIRED',
 ]);
 const publicCodes = new Set([
   'MODEL_CANCELLED',
@@ -33,6 +41,8 @@ const publicCodes = new Set([
   'TRUNCATED_RESPONSE',
   'SENSITIVE_RESPONSE',
   'BUDGET_EXCEEDED',
+  'TOKEN_BUDGET_EXCEEDED',
+  'TOKEN_USAGE_UNKNOWN',
   'KEY_REQUIRED',
   'CREDENTIAL_UNAVAILABLE',
   'STORAGE_ERROR',
@@ -47,6 +57,7 @@ const publicCodes = new Set([
   'ARCHIVED',
   'CONFIRMATION_REQUIRED',
   'STALE_PLAN',
+  'STALE_SOURCE',
   'SOURCE_LIMIT',
   'SOURCE_IO',
   'SOURCE_COMMIT_UNCERTAIN',
@@ -63,16 +74,43 @@ const publicCodes = new Set([
 function hash(value: unknown) {
   return createHash('sha256').update(JSON.stringify(value)).digest('hex');
 }
-function request(value: unknown): CodingRequest {
+function request(value: unknown): CodingExecutionRequest {
   assertRecord(value);
-  assertFields(value, ['schemaVersion', 'requestId', 'projectId', 'planRunId']);
-  if (value.schemaVersion !== 1) throw new AppError('INVALID_INPUT', '源码请求版本无效。');
-  return {
-    schemaVersion: 1,
+  const schema = Object.getOwnPropertyDescriptor(value, 'schemaVersion');
+  if (!schema || !('value' in schema)) throw new AppError('INVALID_INPUT', '源码请求版本无效。');
+  const fields = ['schemaVersion', 'requestId', 'projectId', 'planRunId'];
+  if (schema.value === 2) {
+    fields.push('sourceRevision', 'sourceHash', 'instruction');
+    if (
+      Reflect.ownKeys(value).length !== fields.length ||
+      Reflect.ownKeys(value).some((key) => {
+        const descriptor = Object.getOwnPropertyDescriptor(value, key)!;
+        return (
+          typeof key !== 'string' ||
+          !fields.includes(key) ||
+          !descriptor.enumerable ||
+          !('value' in descriptor)
+        );
+      })
+    )
+      throw new AppError('INVALID_INPUT', '源码修改请求格式无效。');
+  } else if (schema.value !== 1) throw new AppError('INVALID_INPUT', '源码请求版本无效。');
+  assertFields(value, fields);
+  const base = {
+    schemaVersion: 1 as const,
     requestId: parseRevisionId(value.requestId),
     projectId: parseProjectId(value.projectId),
     planRunId: parseRevisionId(value.planRunId),
   };
+  return schema.value === 2
+    ? {
+        ...base,
+        schemaVersion: 2,
+        sourceRevision: parseSourceRevision(value.sourceRevision),
+        sourceHash: parseSourceHash(value.sourceHash),
+        instruction: parseModificationInstruction(value.instruction),
+      }
+    : base;
 }
 /** Stable trusted UUID; the model does not choose transaction IDs or project bindings. */
 function toolId(runId: string, callId: string) {
@@ -91,6 +129,7 @@ export class CodingRunner {
     private readonly source: SourceStore,
     private readonly tools: SourceToolExecutor,
     private readonly models: Pick<ModelService, 'toolTurn'>,
+    private readonly options: { assertModificationSafe?: (text: string) => void } = {},
   ) {}
 
   cancel() {
@@ -144,6 +183,32 @@ export class CodingRunner {
     if (this.active) throw new AppError('BUSY', '源码生成正在进行，请等待或取消。');
     const context = { projectId, planRunId };
     const prepared = this.tools.prepare(context);
+    let expected = this.source.get(projectId);
+    const initialFilesHash = hash(expected.files);
+    const modifying = parsed.schemaVersion === 2;
+    const sameBinding = (binding: typeof prepared.binding | null) =>
+      binding?.planRunId === prepared.binding.planRunId &&
+      binding.planInputHash === prepared.binding.planInputHash &&
+      binding.planArtifactHash === prepared.binding.planArtifactHash;
+    if (parsed.schemaVersion === 2) {
+      if (
+        !expected.files.length ||
+        expected.revision !== parsed.sourceRevision ||
+        hash(expected) !== parsed.sourceHash
+      )
+        throw new AppError('STALE_SOURCE', '修改基于的源码已变化，请刷新后重新提交。');
+      if (!sameBinding(this.source.history(projectId).at(-1)?.binding ?? null))
+        throw new AppError('STALE_PLAN', '已有源码不属于当前确认计划，请先核对方向。');
+      try {
+        (this.options.assertModificationSafe ?? ((text) => assertExportContentsSafe([text])))(
+          parsed.instruction,
+        );
+      } catch (error) {
+        if (error instanceof AppError && error.code === 'EXPORT_SENSITIVE')
+          throw new AppError('MODIFICATION_SENSITIVE', '修改要求中发现疑似凭据，请移除后再提交。');
+        throw error;
+      }
+    }
     const now = new Date().toISOString();
     const run: CodingRun = {
       id: parsed.requestId,
@@ -184,15 +249,95 @@ export class CodingRunner {
       run.updatedAt = new Date().toISOString();
       persist();
     };
-    const check = () => {
+    const check = (source = true) => {
       if (controller.signal.aborted) throw new AppError('MODEL_CANCELLED', '源码生成已取消。');
-      this.tools.prepare(context);
+      const fresh = this.tools.prepare(context);
+      if (modifying && !sameBinding(fresh.binding))
+        throw new AppError('STALE_PLAN', '确认方向已变化，本次修改已停止。');
+      if (modifying && source && hash(this.source.get(projectId)) !== hash(expected))
+        throw new AppError('STALE_SOURCE', '源码已被其他操作修改，本次修改已停止。');
     };
     const messages: ModelMessage[] = [
-      { role: 'system', content: codingPrompt },
+      { role: 'system', content: modifying ? modificationPrompt : codingPrompt },
       { role: 'user', content: JSON.stringify(prepared) },
+      ...(parsed.schemaVersion === 2
+        ? [
+            {
+              role: 'user' as const,
+              content: JSON.stringify({
+                type: 'user_modification',
+                sourceRevision: parsed.sourceRevision,
+                sourceHash: parsed.sourceHash,
+                instruction: parsed.instruction,
+              }),
+            },
+          ]
+        : []),
     ];
     const receipts = new Map<string, { hash: string; response: SourceToolResponse }>();
+    const readHashes = new Map<string, string>();
+    const ownCommit = (requestId: string) => {
+      const snapshot = this.source.get(projectId);
+      const checkpoint = this.source.history(projectId).at(-1);
+      if (
+        snapshot.revision !== expected.revision + 1 ||
+        checkpoint?.revision !== snapshot.revision ||
+        checkpoint.requestId !== requestId ||
+        checkpoint.restoredFrom !== null ||
+        checkpoint.snapshotHash !== hash(snapshot) ||
+        !sameBinding(checkpoint.binding)
+      )
+        throw new AppError('STALE_SOURCE', '源码提交不属于本次修改，已停止后续操作。');
+      return snapshot;
+    };
+    const execute = (input: unknown): SourceToolResponse => {
+      if (modifying) {
+        // Invalid arguments still go through the trusted dispatcher for its fixed error text.
+        let parsedTool;
+        try {
+          parsedTool = parseSourceToolRequest(input);
+        } catch {
+          /* Dispatcher validates below. */
+        }
+        if (
+          parsedTool?.tool === 'apply_changes' &&
+          (parsedTool.arguments.expectedRevision !== expected.revision ||
+            parsedTool.arguments.changes.some((change) => {
+              const existing = expected.files.find((file) => file.path === change.path);
+              return change.expectedHash !== (existing?.sha256 ?? null);
+            }))
+        )
+          return {
+            schemaVersion: 1,
+            requestId: parsedTool.requestId,
+            ok: false,
+            error: {
+              code: 'SOURCE_CONFLICT',
+              message: '修改必须基于本次已核对的源码版本和文件哈希，整批修改尚未执行。',
+              retryable: false,
+            },
+          };
+        if (
+          parsedTool?.tool === 'apply_changes' &&
+          parsedTool.arguments.changes.some((change) => {
+            const existing = expected.files.find((file) => file.path === change.path);
+            return existing && readHashes.get(change.path) !== existing.sha256;
+          })
+        )
+          return {
+            schemaVersion: 1,
+            requestId: parsedTool.requestId,
+            ok: false,
+            error: {
+              code: 'SOURCE_READ_REQUIRED',
+              message:
+                '修改或删除已有文件前，请先用 read_file 读取该文件的当前内容。整批修改尚未执行。',
+              retryable: false,
+            },
+          };
+      }
+      return this.tools.execute(context, input);
+    };
     try {
       for (let round = 0; round < 4; round++) {
         check();
@@ -204,10 +349,13 @@ export class CodingRunner {
         check();
         messages.push(turn.message);
         if (turn.finishReason === 'stop') {
-          run.status =
-            this.source.get(projectId).revision > run.initialRevision
-              ? 'draft_saved'
-              : 'no_changes';
+          run.status = (
+            modifying
+              ? hash(expected.files) !== initialFilesHash
+              : this.source.get(projectId).revision > run.initialRevision
+          )
+            ? 'draft_saved'
+            : 'no_changes';
           break;
         }
         const calls = turn.message.tool_calls!;
@@ -230,11 +378,44 @@ export class CodingRunner {
             tool: call.function.name,
             arguments: JSON.parse(call.function.arguments),
           };
-          let response = cached?.response ?? this.tools.execute(context, input);
+          let response = cached?.response ?? execute(input);
           if (!response.ok && response.error.retryable) {
-            check();
+            if (modifying) {
+              check(false);
+              // A rename may have committed before returning an uncertain response.
+              // Only this exact tool receipt can authorize the one local replay.
+              if (hash(this.source.get(projectId)) !== hash(expected)) ownCommit(input.requestId);
+            } else check();
             // Local receipt reconciliation, using the same ID; no additional model request.
             response = this.tools.execute(context, input);
+          }
+          if (modifying && !cached && response.ok) {
+            if (response.requestId !== input.requestId)
+              throw new AppError('STALE_SOURCE', '源码工具回执不匹配，本次修改已停止。');
+            if (response.data.tool === 'apply_changes') {
+              const next = ownCommit(input.requestId);
+              if (
+                response.data.previousRevision !== expected.revision ||
+                response.data.revision !== next.revision
+              )
+                throw new AppError('STALE_SOURCE', '源码修改结果不匹配当前版本。');
+              for (const file of expected.files) {
+                if (
+                  next.files.find((candidate) => candidate.path === file.path)?.sha256 !==
+                  file.sha256
+                )
+                  readHashes.delete(file.path);
+              }
+              expected = next;
+            } else if (response.data.tool === 'read_file') {
+              check();
+              const read = response.data;
+              const file = expected.files.find((candidate) => candidate.path === read.file.path);
+              if (read.revision !== expected.revision || !file || hash(file) !== hash(read.file))
+                throw new AppError('STALE_SOURCE', '读取结果不匹配当前源码，本次修改已停止。');
+              readHashes.set(file.path, file.sha256);
+            }
+            check();
           }
           receipts.set(call.id, { hash: fingerprint, response });
           if (!response.ok && !recoverable.has(response.error.code))
@@ -257,7 +438,12 @@ export class CodingRunner {
       run.status =
         code === 'MODEL_CANCELLED' || code === 'CANCELLED'
           ? 'cancelled'
-          : code === 'CODING_LIMIT'
+          : [
+                'CODING_LIMIT',
+                'BUDGET_EXCEEDED',
+                'TOKEN_BUDGET_EXCEEDED',
+                'TOKEN_USAGE_UNKNOWN',
+              ].includes(code)
             ? 'limited'
             : 'failed';
       run.errorCode = code;

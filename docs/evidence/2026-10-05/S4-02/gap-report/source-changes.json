@@ -1,0 +1,29 @@
+{
+  "baseline": "fd80130752d9885c3c413f2231c86c378eac2416",
+  "version": "0.16.0",
+  "modified": [
+    "package-lock.json",
+    "package.json",
+    "src/main/app.ts",
+    "src/main/coding-tool-schema.ts",
+    "src/main/preload.ts",
+    "src/renderer/PlanPanel.tsx",
+    "src/renderer/api.ts",
+    "src/shared/contracts.ts",
+    "tests/plan-electron-smoke.ts"
+  ],
+  "added": [
+    "scripts/gap-report-smoke.mjs",
+    "src/main/gap-evidence-store.ts",
+    "src/main/gap-report.ts",
+    "src/main/gap-service.ts",
+    "src/renderer/GapReportPanel.tsx",
+    "src/renderer/gap-report.css",
+    "src/shared/gap-contracts.ts",
+    "tests/gap-evidence-store.test.ts",
+    "tests/gap-report-electron-smoke.ts",
+    "tests/gap-report.test.ts",
+    "tests/gap-service.test.ts"
+  ],
+  "deleted": []
+}

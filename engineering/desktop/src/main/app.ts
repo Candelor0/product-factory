@@ -5,6 +5,10 @@ import { mkdirSync } from 'node:fs';
 import { ProjectStore } from './project-store';
 import { DataBackupService } from './data-backup-service';
 import { DataMigrationService } from './data-migration-service';
+import { GapService } from './gap-service';
+import { GapEvidenceStore } from './gap-evidence-store';
+import { WorkflowRunner } from './workflow-runner';
+import { WorkflowStore } from './workflow-store';
 import { AppError } from './validation';
 import { ModelService } from './model-service';
 import { BlogRuntimeManager } from './blog-runtime';
@@ -101,7 +105,21 @@ export async function startDesktop(
   const models = new ModelService(join(dataPath, 'credentials'), cipher, options.modelRequest);
   const sources = new SourceStore(store);
   const sourceTools = new SourceToolExecutor(store, plans, sources);
-  const coding = new CodingRunner(new CodingStore(store), sources, sourceTools, models);
+  const assertModificationSafe = (instruction: string) => {
+    try {
+      models.assertExportSafe([instruction]);
+    } catch (error) {
+      if (error instanceof AppError && error.code === 'EXPORT_SENSITIVE')
+        throw new AppError(
+          'SENSITIVE_INPUT',
+          '修改要求中发现疑似凭据，请移除后再提交。未保存或发送本次要求。',
+        );
+      throw error;
+    }
+  };
+  const coding = new CodingRunner(new CodingStore(store), sources, sourceTools, models, {
+    assertModificationSafe,
+  });
   const artifacts = new BuildStore(store);
   const builds = new BuildService(store, sources, sourceTools, artifacts);
   const appData = new AppDataStore(store);
@@ -131,8 +149,18 @@ export async function startDesktop(
         signal,
       ),
   });
+  const gaps = new GapService(
+    store,
+    plans,
+    sources,
+    builds,
+    runtime,
+    new GapEvidenceStore(store),
+    (contents) => models.assertExportSafe(contents),
+  );
   const repairs = new RepairRunner(new RepairStore(store), sources, sourceTools, models, builds, {
     runtime,
+    assertModificationSafe,
   });
   const recovery = new RecoveryService(
     store,
@@ -144,6 +172,23 @@ export async function startDesktop(
     builds,
     artifacts,
     runtime,
+  );
+  const workflows = new WorkflowRunner(
+    store,
+    sources,
+    sourceTools,
+    coding,
+    builds,
+    runtime,
+    repairs,
+    new WorkflowStore(store),
+    {
+      assertModificationSafe,
+      beforeRun: (projectId) => {
+        recovery.state(projectId);
+        loadToolchain(toolchainPath, binaryPath);
+      },
+    },
   );
   const buildState = (projectId: string) => ({
     ...builds.state(projectId),
@@ -264,6 +309,10 @@ export async function startDesktop(
     recovery.state(text(p.projectId));
   };
   const api: Record<keyof FactoryApi, (input?: unknown) => unknown> = {
+    workflowState: (input) => workflows.state(input),
+    runWorkflow: (input) => workflows.run(input),
+    gapReport: (input) => gaps.state(input),
+    recordGapEvidence: (input) => gaps.record(input),
     dataMigrationState: (input) => dataMigrations.state(input),
     previewDataMigration: (input) => dataMigrations.preview(input),
     confirmDataMigration: (input) => dataMigrations.confirm(input),
@@ -345,6 +394,16 @@ export async function startDesktop(
       return repairs.state(text(p.projectId));
     },
     repairSource: async (input) => {
+      const p = payload(input, [
+        'schemaVersion',
+        'requestId',
+        'projectId',
+        'planRunId',
+        'sourceRevision',
+        'runtimeReportId',
+      ]);
+      if (p.schemaVersion !== 1)
+        throw new AppError('INVALID_INPUT', '此入口仅支持独立修复，请使用修改并检查。');
       reconcileBeforeWork(input);
       loadToolchain(toolchainPath, binaryPath);
       return repairs.repair(input);
@@ -397,6 +456,9 @@ export async function startDesktop(
       return coding.file(text(p.projectId), p.path);
     },
     generateSource: (input) => {
+      const p = payload(input, ['schemaVersion', 'requestId', 'projectId', 'planRunId']);
+      if (p.schemaVersion !== 1)
+        throw new AppError('INVALID_INPUT', '此入口仅支持源码生成，请使用修改并检查。');
       reconcileBeforeWork(input);
       return coding.generate(input);
     },
@@ -496,6 +558,7 @@ export async function startDesktop(
     checkProvider: () => models.check(),
     deleteProviderKey: () => models.deleteKey(),
     cancelGeneration: () => {
+      workflows.cancel();
       dataBackups.cancel();
       dataMigrations.cancel();
       appAi.cancelAll();
@@ -512,6 +575,8 @@ export async function startDesktop(
     },
   };
   const nonmutating = new Set<keyof FactoryApi>([
+    'workflowState',
+    'gapReport',
     'dataMigrationState',
     'discardDataMigration',
     'dataBackupState',
@@ -604,6 +669,7 @@ export async function startDesktop(
     if (BrowserWindow.getAllWindows().length === 0) void createWindow();
   });
   app.on('before-quit', (event) => {
+    workflows.cancel();
     dataBackups.cancel();
     dataMigrations.cancel();
     exports.cancel();
@@ -650,6 +716,8 @@ export async function startDesktop(
     appDataService,
     dataBackups,
     dataMigrations,
+    gaps,
+    workflows,
     exports,
     dataPath,
   };

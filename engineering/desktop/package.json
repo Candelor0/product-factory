@@ -1,6 +1,6 @@
 {
   "name": "product-factory-desktop",
-  "version": "0.15.0",
+  "version": "0.19.0",
   "private": true,
   "description": "产品工厂桌面工作台",
   "type": "module",
@@ -33,7 +33,10 @@
     "test:app-ai-preview": "node scripts/app-ai-preview-smoke.mjs",
     "test:app-ai": "node scripts/app-ai-smoke.mjs",
     "test:data-backup": "node scripts/data-backup-smoke.mjs",
-    "test:data-migration": "node scripts/data-migration-smoke.mjs"
+    "test:data-migration": "node scripts/data-migration-smoke.mjs",
+    "test:gap-report": "node scripts/gap-report-smoke.mjs",
+    "test:workflow": "node scripts/workflow-smoke.mjs",
+    "test:modification": "node scripts/modification-smoke.mjs"
   },
   "dependencies": {
     "lucide-react": "1.49.0",

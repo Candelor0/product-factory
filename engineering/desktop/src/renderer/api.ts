@@ -35,6 +35,10 @@ const previewSnapshot: AppSnapshot = {
 };
 
 const previewApi: FactoryApi = {
+  workflowState: unavailable,
+  runWorkflow: unavailable,
+  gapReport: unavailable,
+  recordGapEvidence: unavailable,
   dataMigrationState: unavailable,
   previewDataMigration: unavailable,
   confirmDataMigration: unavailable,

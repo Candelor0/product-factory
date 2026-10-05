@@ -1,10 +1,10 @@
 # 开发与运行说明
 
-日期：2026-10-05。范围：0.15.0体验包、源码生成、受控预览、有限修复、检查点恢复、项目级持久数据、源码维护包导出、开发token预算、项目文本AI授权、数据独立备份/确认恢复与受控结构迁移。
+日期：2026-10-05。范围：0.19.0、源码生成、受控预览、有限修复、检查点恢复、项目级持久数据、源码维护包导出、开发token预算、项目文本AI授权、数据独立备份/确认恢复、受控结构迁移、需求差距报告、自动开发连续流程及自然语言修改已有应用。当前优先Mac版，Windows发布按D-037延后。
 
 ## 直接审阅
 
-新包：[产品工厂0.15.0.app](../artifacts/desktop/2026-10-05T03-05-45-701Z/产品工厂-darwin-arm64/产品工厂.app)，不需要另外启动Vite。继续采用中央想法输入、侧栏项目与详情折叠，见[视觉规范](design/WORKBENCH_VISUAL.md)。71项新增真实Electron结构迁移/回退与跨进程重开、174项备份/数据/源码导出回归通过；包资源和ASAR内工具加载单独核验，见[报告](evidence/2026-10-05/S4-02/data-migration/result.md)。本轮未手动打开真实数据的新包，没有分发签名、公证或Windows安装验证；若系统阻止未知应用，不要求关闭系统保护。
+新包：[产品工厂0.19.0.app](../artifacts/desktop/2026-10-05T06-16-52-179Z/产品工厂-darwin-arm64/产品工厂.app)，不需要另外启动Vite。继续采用中央想法输入、侧栏项目与详情折叠，见[视觉规范](design/WORKBENCH_VISUAL.md)。本轮修复要求传递、确认到开发路径、旧记录兼容及包核验见[报告](evidence/2026-10-05/S3-02/core-flow/result.md)。真实模型准备因已有窗口占用而停止，本轮0次调用。未手动用真实数据打开新包，没有分发签名、公证或干净Mac安装验证；Windows已延后。若系统阻止未知应用，不要求关闭系统保护。
 
 首页输入想法，点击开始或Enter创建；Shift+Enter换行，名称自动取想法开头，当前会话切换项目保留未提交草稿。当前可创建/重命名/归档项目，保存和确认需求版本，配置在线模型，生成并确认页面方向。需要在应用的「模型与设置」中填写自己的 Key；不要把 Key 发到聊天、写进项目或文档。连接检测会产生一次模型调用。
 
@@ -12,7 +12,11 @@
 
 已确认需求和页面方向后，可打开「开发计划」点击「整理开发计划」。无需Key，会保存页面、功能、数据与验收清单及待明确问题；新版本使旧计划过期。高级设置可明确选择普通网页或AI任务型网页，默认普通网页。规则整理成功只代表清单就绪，任务仍待实现、检查仍未运行。
 
-博客样例是固定模板，非当前需求的AI生成成果，不改变需求/页面确认阶段、不调用模型。模型可生成源码并构建前端预览；已接入有限编译/启动修复、项目级JSON持久数据和源码维护包导出；完整应用交付、数据迁移及图片仍未实现。
+博客样例是固定模板，非当前需求的AI生成成果，不改变需求/页面确认阶段、不调用模型。模型可生成源码并构建前端预览；已接入有限编译/启动修复、项目级JSON持久数据和源码维护包导出；已实现有限JSON结构迁移，完整应用验收和图片能力仍待补齐。
+
+确认需求、页面方向并整理计划后，可点击「自动开发」连续完成源码生成、构建和启动检查，必要时至多一次有限修复。停止会保留已保存源码，重开不自动续费；「检查已有源码并继续」跳过生成，但必要修复仍可能调用模型。结果不确定时「核对原请求」只读原记录。候选启动通过后仍需预览操作和逐项业务核验。[自动开发协议](AUTOMATIC_WORKFLOW.md)。
+
+已有当前计划的源码后，在「修改已有应用」写下不超过2000字的页面或行为调整，点击「修改并检查」。要求会保存在本项目并发送模型；不要填写凭据或个人业务内容。工作台显示原要求、前后源码版本和文件变化，最近历史只读。没有净变化会明确说明，取消或记录不完整时不会误报无变化；已保存源码保留。主要功能、页面或使用对象变化请重新确认需求和页面方向。后续若需要有限修复，原修改要求仍会传给模型；编译和启动通过不代表这些要求已实现。原数据不随源码修改回退，结构变更仍需独立预览确认。[自然语言修改协议](APPLICATION_MODIFICATION.md)。
 
 在当前开发计划下点击「生成源码草稿」，使用已保存的模型连接，最多4轮请求、12次工具调用，计入累计额度。可通过全局停止取消；已保存源码保留，文件默认折叠并只读查看。中断重开不会自动请求模型；「继续生成源码」是新一轮主动调用。源码保存本身不代表计划中的验收通过。[协议](SOURCE_TOOLS_PROTOCOL.md) · [验证报告](evidence/2026-10-03/S3-02/model-coding/result.md)。
 
@@ -39,8 +43,11 @@
 | `npm run build` | 类型检查并构建renderer/main/preload、固定博客、React运行时、本机esbuild与16文件导出工具包 |
 | `npm start` | 使用已构建的 Electron 桌面版 |
 | `npm run preview:ui` | 浏览器只读 UI 预览，不能保存项目或调用模型 |
-| `npm test` | 最近670项全量及后续定向通过，详见当前验证报告：存储/源码事务、导出/重建、协议、模型模拟及真实本地HTTP；需允许回环监听 |
+| `npm test` | 全量Node检查，实际数量与结果见当前验证报告：存储/源码事务、导出/重建、协议、模型模拟及真实本地HTTP；需允许回环监听 |
 | `npm run test:desktop` | 真实 Electron 两次进程启动与 UI/IPC 检查，先 build |
+| `npm run test:gap-report` | 差距报告真实React表单、IPC、版本失效、重开与1440/1024布局；仅合成数据 |
+| `npm run test:modification` | 自然语言修改、真实页面变化、持久数据、历史/取消/重开和敏感输入边界；先build，仅合成模型 |
+| `npm run test:workflow` | 自动开发两进程桌面流程、修复/取消/重开/原请求核对与截图 |
 | `npm run test:plan` | 真实计划按钮、版本变化、IPC与两个进程重开，先build |
 | `npm run test:runtime` | 固定模板表单/隔离/未保存保护/两进程重开/停服，先build；需回环监听 |
 | `npm run test:visual` | 单输入入口/侧栏/草稿、折叠字段、设置用量、键盘与截图检查，独立合成数据；先build |
@@ -58,7 +65,7 @@
 | `npm run test:source` | 合成源码工具与五个独立Node进程，验证提交前/后退出和恢复；无模型、无UI，不需要先build |
 | `npm run test:recovery` | 检查点UI/恢复/重编译、业务字节保留与新进程缺失源码拒绝，55项；先build，无模型请求 |
 | `npm run test:recovery-process` | 8个真实SIGKILL边界104项，合成模型响应、真实源码/编译/恢复；先build准备工具链 |
-| `npm run package:mac` | 本机架构内部应用包，先 build；不做分发签名、不公证 |
+| `npm run package:mac` | 本机架构应用包，先 build；不做分发签名、不公证 |
 | `npm run format:check` | 检查工程格式 |
 
 本次开发 Node 22.23.2、npm 10.9.8；应用自带 Electron 44.5.1 / Node 24.21.0。工程其他依赖锁于 package-lock.json。Vite 构建会报告 Lucide 的 use-client 指令提示；本项目为纯客户端，无服务端组件边界，构建成功。esbuild JS内含未使用的包查找回退，打包器另报require.resolve提示；实际测试禁止外部JS包加载并精简PATH仍成功，正式工具路径由随包清单校验后指定。
@@ -70,6 +77,7 @@
 | 路径（相对 engineering/desktop） | 内容 |
 | --- | --- |
 | src/main/app.ts | 桌面生命周期、IPC 来源/参数验证、并发变更门闩、网络/导航限制 |
+| src/main/gap-service.ts / gap-report.ts / gap-evidence-store.ts | 计划逐项差距、源码声明线索、技术证据与版本绑定用户核验，记录原子追加 |
 | src/main/project-store.ts | UUID 项目、格式版本 1、原子存储、内容校验、版本与确认失效 |
 | src/main/model-service.ts | DeepSeek/自定义连接、系统加密接口、错误与取消、开发调用/token预算及受信应用文本传输 |
 | src/main/app-data-protocol.ts / app-data-store.ts / app-data-service.ts / app-data-sdk.ts | 生成应用JSON协议、原子持久存储/有界历史、临时与持久会话及固定前端SDK |
@@ -82,6 +90,7 @@
 | src/main/development-plan.ts / plan-store.ts | 确认版本绑定、纯规则计划、原子派生记录与重开校验 |
 | src/shared/plan-contracts.ts | 计划请求、待办、来源与阶段记录 |
 | src/main/source-protocol.ts / source-store.ts / source-tools.ts | 内部受限源码协议、虚拟树原子历史/回执、确认版本绑定及完整输入；不执行代码 |
+| src/main/workflow-runner.ts / workflow-store.ts | 有界生成/构建/启动/修复编排、原子父流程与精确回执核对 |
 | src/main/coding-runner.ts / coding-store.ts / coding-tool-schema.ts | 4轮/12工具协调、原子运行元数据与事务关联、有限接口定义 |
 | src/main/source-compiler.ts / toolchain.ts | 虚拟源码编译、依赖/动态导入限制、随包二进制与运行时校验 |
 | src/main/build-service.ts / build-store.ts | 计划/源码版本绑定、取消、不可变成功产物、失败保留 |
@@ -103,11 +112,11 @@
 
 Mac 默认是 `~/Library/Application Support/ProductFactory/`，Windows 按系统 appData 目录下的 ProductFactory 组织，但 Windows 尚未实测。
 
-`projects/<UUID>/project.json`保存项目清单及需求/方案历史；documents、source、data、checkpoints、runs分目录。博客样例文章在`projects/<UUID>/data/blog/articles.json`，包括正文、标签、状态和revision；不覆盖项目文档。应用授权和用量在`projects/<UUID>/runs/app-ai.json`，独立初始化标记为`runs/app-ai.initialized.json`，不保存提示/响应正文。开发计划在`projects/<UUID>/runs/development-plans.json`，最多100版/16MiB，不修改确认或业务数据。生成应用业务数据在data/generated/{identity,state}.json，外层data/generated.initialized.json用于识别初始化后目录缺失；与固定博客数据分开。源码在source/workspace.json保存虚拟文件树与历史，运行元数据在runs/coding.json；修复元数据在runs/repairs.json，最多50次/1MiB；构建尝试在runs/build-attempts.json，最多100条/1MiB；成功构建在runs/builds.json，最多20份/32MiB；运行观察在runs/runtime-reports.json，最多100条/1MiB；并未生成宿主src目录。`credentials/provider.json`保存加密密钥材料、连接配置和用量，预览没有访问它的接口。Electron缓存也在应用数据目录。合成测试数据在artifacts下的smoke、runtime-smoke、plan-smoke、visual-smoke、coding-smoke、build-smoke、repair-smoke分目录。2026-10-03真实工具测试新建“工具实测 · 计数器”，已保存源码；0.7.0构建该草稿；0.8.0另建“修复实测 · 计数器”验证缺失模块修复，原有项目文件未变。
+`projects/<UUID>/project.json`保存项目清单及需求/方案历史；documents、source、data、checkpoints、runs分目录。博客样例文章在`projects/<UUID>/data/blog/articles.json`，包括正文、标签、状态和revision；不覆盖项目文档。应用授权和用量在`projects/<UUID>/runs/app-ai.json`，独立初始化标记为`runs/app-ai.initialized.json`，不保存提示/响应正文。开发计划在`projects/<UUID>/runs/development-plans.json`，最多100版/16MiB，不修改确认或业务数据。生成应用业务数据在data/generated/{identity,state}.json，外层data/generated.initialized.json用于识别初始化后目录缺失；与固定博客数据分开。源码在source/workspace.json保存虚拟文件树与历史，运行元数据在runs/coding.json；自动开发父流程在runs/workflows.json（50条/2MiB；首次修改升级schema2，明文保存有界用户修改要求），身份标记runs/workflows.initialized.json；修复元数据在runs/repairs.json，最多50次/1MiB；构建尝试在runs/build-attempts.json，最多100条/1MiB；成功构建在runs/builds.json，最多20份/32MiB；运行观察在runs/runtime-reports.json，最多100条/1MiB；并未生成宿主src目录。`credentials/provider.json`保存加密密钥材料、连接配置和用量，预览没有访问它的接口。Electron缓存也在应用数据目录。合成测试数据在artifacts下的smoke、runtime-smoke、plan-smoke、visual-smoke、coding-smoke、build-smoke、repair-smoke分目录。2026-10-03真实工具测试新建“工具实测 · 计数器”，已保存源码；0.7.0构建该草稿；0.8.0另建“修复实测 · 计数器”验证缺失模块修复，原有项目文件未变。
 
 博客每篇标题160、正文60000字符、标签最多20个且每个32字符；1000篇、总JSON8MiB。JSON方案是当前实验，不代表SQLite迁移已完成。停止不会删除已保存文章；保留目录后才能恢复文章，固定博客样例暂无独立数据导出或恢复UI。生成应用JSON另有工作台备份与确认恢复入口。
 
-不要手动改清单中的历史内容；内容哈希不匹配、格式版本未知、路径链接异常会停止读取且保留文件。源码首次恢复会原子升级schema 1→2；首次运行修复升级repairs schema 2；首次打开持久应用升级runtime-reports schema 2，0.13.0启动模型服务时再将provider升级schema 2，应继续使用0.13.0或更新版，0.15.0新增业务JSON结构迁移，首次带结构初始化或迁移会升级data/generated/state.json为schema2，应使用0.15.0或更新版；其他记录没有通用schema迁移工具；损坏不能默认为空项目。备份应用数据目录时，凭据仍受原操作系统账户绑定，不保证跨机器可解密。
+不要手动改清单中的历史内容；内容哈希不匹配、格式版本未知、路径链接异常会停止读取且保留文件。源码首次恢复会原子升级schema 1→2；首次运行修复升级repairs schema 2；首次打开持久应用升级runtime-reports schema 2，0.13.0启动模型服务时再将provider升级schema 2，应继续使用0.13.0或更新版，0.15.0新增业务JSON结构迁移，首次带结构初始化或迁移会升级data/generated/state.json为schema2，应使用0.15.0或更新版；0.18.0首次自然语言修改原子升级workflows为schema2；0.19.0在新修改进入有限修复时原子升级为schema3，应继续使用0.19.0或更新版；旧无标记的修复仍按原请求核对；其他记录没有通用schema迁移工具；损坏不能默认为空项目。备份应用数据目录时，凭据仍受原操作系统账户绑定，不保证跨机器可解密。
 
 ## 数据结构更新
 
@@ -127,4 +136,11 @@ Mac 默认是 `~/Library/Application Support/ProductFactory/`，Windows 按系�
 
 ## 下一阶段
 
-0.15.0新增业务结构声明、相邻迁移和无后续写入时的受限回退。下一项优先补产品工厂的需求—实现—验证差距报告，再衔接确认后的自动开发主流程；博客作为首个验收案例。价格配置、开发调用细分归属、图片、完整Blueprint分析/worker和端到端验收仍待补齐。当前受测前端窗口的隔离范围见[构建协议](CONTROLLED_BUILD.md)，没有验证任意后端、所有网络旁路或双平台系统沙箱。
+0.15.0新增业务结构声明、相邻迁移和无后续写入时的受限回退。0.16.0新增产品工厂需求—实现—验证差距报告，0.17.0串联确认后的生成/构建/启动检查/有限修复。0.18.0接入自然语言修改、精确文件差异与只读历史。0.19.0补齐修改要求在后续编译/启动修复中的传递，以及确认页面后接续开发的提示。下一项继续围绕产品工厂主流程完成真实案例和业务交互核验；博客作为首个验收输入。价格配置、开发调用细分归属、图片、完整Blueprint分析/worker和端到端验收仍待补齐。当前受测前端窗口的隔离范围见[构建协议](CONTROLLED_BUILD.md)，没有验证任意后端、所有网络旁路或完整系统沙箱；Windows按D-037留后续独立验收。
+
+
+### 需求、实现与验证
+
+开发计划页的同名区域列出页面、功能、数据和验收目标。可筛选未验证、用户通过、未通过、缺少实现及已过期；源码路径只是实现线索，技术检查单独显示。点击“记录用户核验”，先实际操作，再选择结果和关联源码，填写步骤、预期和实际。通过必须关联当前成功构建和至少一个源码文件。
+
+修改需求、源码或重新构建后刷新报告，旧结论会标为过期；表单不会把旧步骤自动绑定到新版本。结果不确定时可按原请求核对，重新编辑会产生新请求。记录不调用模型、不读取业务库；不要填写Key或私人业务内容。协议与容量见[GAP_REPORT](GAP_REPORT.md)。完整自动业务测试和独立报告导出尚未实现。

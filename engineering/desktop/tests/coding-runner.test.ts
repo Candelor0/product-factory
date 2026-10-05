@@ -225,7 +225,7 @@ test('tool budget rejects the entire exceeding round before executing any of it'
 test('persisted global budget stops further network requests while retaining committed source', async (t) => {
   const f = fixture(t, transport([calls('list_files', {}), write()]), 2);
   const state = await f.runner.generate(f.request);
-  assert.equal(state.run?.status, 'failed');
+  assert.equal(state.run?.status, 'limited');
   assert.equal(state.run?.errorCode, 'BUDGET_EXCEEDED');
   assert.equal(state.revision, 1);
   assert.equal(f.models.usage().calls, 2);

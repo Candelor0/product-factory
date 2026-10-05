@@ -1,0 +1,27 @@
+{
+  "baseline": "0.18.0",
+  "version": "0.19.0",
+  "modified": [
+    "package-lock.json",
+    "package.json",
+    "src/main/app.ts",
+    "src/main/repair-runner.ts",
+    "src/main/workflow-runner.ts",
+    "src/main/workflow-store.ts",
+    "src/renderer/App.tsx",
+    "src/shared/modification.ts",
+    "src/shared/repair-contracts.ts",
+    "src/shared/workflow-contracts.ts",
+    "tests/electron-smoke.ts",
+    "tests/modification-electron-smoke.ts",
+    "tests/plan-electron-smoke.ts",
+    "tests/repair-runner.test.ts",
+    "tests/workflow-runner.test.ts",
+    "tests/workflow-store.test.ts"
+  ],
+  "added": [
+    "scripts/core-live-smoke.mjs",
+    "tests/core-live-smoke.ts"
+  ],
+  "removed": []
+}

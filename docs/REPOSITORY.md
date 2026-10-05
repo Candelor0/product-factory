@@ -1,14 +1,18 @@
 # 仓库说明
 
-版本：0.15.0。
+版本：0.19.0。按用户确认的D-040，将当前版本同步GitHub，完成上传后公开现有仓库；实际执行结果见[本轮记录](sessions/2026-10-05-13.md)。当前按D-037优先Mac版与核心功能，Windows发布延后。
 
-GitHub：[Candelor0/product-factory](https://github.com/Candelor0/product-factory)。私有仓库，默认分支main。
+GitHub：[Candelor0/product-factory](https://github.com/Candelor0/product-factory)。默认分支main，可见性以GitHub实际设置和本轮记录为准。
 
 ## 保存范围
 
 仓库保存产品工厂源码、测试、构建脚本、依赖锁、第三方许可、需求/设计/任务文档，以及验证报告摘要和源码哈希清单。
 
-以下内容留在本地，不通过Git上传：依赖与编译目录、安装包及打包输入、测试运行数据、上游参考仓库副本、个人项目经历资料、设计参考截图、原始运行日志和证据截图。验证摘要中的本地附件链接可能不在远端仓库内；这不表示附件曾被上传。真实应用数据和模型凭据使用系统应用数据目录，不能加入仓库。
+以下内容留在本地，不通过Git上传：依赖与编译目录、打包输入、测试运行数据、上游参考仓库副本、个人项目经历资料、设计参考截图、原始运行日志和证据截图。验证摘要中的本地附件链接可能不在远端仓库内；这不表示附件曾被上传。真实应用数据和模型凭据使用系统应用数据目录，不能加入仓库。Mac应用包作为独立Release附件上传，不进入Git历史。
+
+## Mac下载
+
+[0.19.0 Release](https://github.com/Candelor0/product-factory/releases/tag/0.19.0)提供Apple Silicon Mac ZIP、SHA256校验值和使用说明。AI功能需用户自己的模型Key。当前没有Windows或Intel Mac包；未完成Apple分发签名、公证、其他Mac干净安装及完整真实模型业务验收。
 
 ## 从源码运行
 

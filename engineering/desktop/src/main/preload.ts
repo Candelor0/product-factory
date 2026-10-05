@@ -1,6 +1,10 @@
 import { contextBridge, ipcRenderer } from 'electron';
 import type { FactoryApi } from '../shared/contracts';
 const names = [
+  'workflowState',
+  'runWorkflow',
+  'gapReport',
+  'recordGapEvidence',
   'dataMigrationState',
   'previewDataMigration',
   'confirmDataMigration',

@@ -236,11 +236,11 @@ async function run() {
   await new Promise((resolve) => setTimeout(resolve, 100));
   check(
     phase === 'create'
-      ? 'design view clearly states development engine is pending'
+      ? 'confirmed design points to explicit planning and automatic development'
       : 'design view blocks changed unapproved requirements',
     await exec(
       phase === 'create'
-        ? "document.body.innerText.includes('方向已确认') && document.body.innerText.includes('整理开发计划后，即可生成源码草稿')"
+        ? "document.body.innerText.includes('方向已确认') && document.body.innerText.includes('先整理开发计划，再点击「自动开发」') && !!document.querySelector('[data-testid=design-plan-next]')"
         : "document.body.innerText.includes('请先确认当前需求版本')",
     ),
   );

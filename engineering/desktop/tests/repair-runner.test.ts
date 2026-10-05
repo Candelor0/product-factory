@@ -20,6 +20,8 @@ import { SourceToolExecutor } from '../src/main/source-tools';
 import { AppError } from '../src/main/validation';
 import type { BuildRequest, BuildResult } from '../src/shared/build-contracts';
 import type { ModelToolCall, ModelToolTurn } from '../src/shared/model-tool-contracts';
+import type { ModificationRepairRequest } from '../src/shared/repair-contracts';
+import { sourceHash } from '../src/main/source-protocol';
 
 const requirements = {
   summary: '本地合成计数器',
@@ -125,7 +127,7 @@ function fixture(t: TestContext) {
   }
   const models: Pick<ModelService, 'toolTurn'> = { toolTurn: async () => stop() };
   const runner = (
-    options?: { timeoutMs?: number; runtime?: Pick<RuntimeService, 'get' | 'state' | 'check'> },
+    options?: ConstructorParameters<typeof RepairRunner>[5],
     service: Pick<BuildService, 'build' | 'cancel'> = builds,
   ) => new RepairRunner(records, sources, tools, models, service, options);
   const journal = () =>
@@ -421,6 +423,7 @@ test('terminal and interrupted requests reopen without paid replay, and conflict
   const request = f.request();
   const runner = f.runner();
   const done = await runner.repair(request);
+  assert.equal(done.run?.requestHash, sourceHash(JSON.stringify(request)));
   f.models.toolTurn = async () => {
     assert.fail('replay must not call model');
   };
@@ -444,6 +447,152 @@ test('terminal and interrupted requests reopen without paid replay, and conflict
   });
   assert.equal((await f.runner().repair(second)).run?.status, 'interrupted');
   assert.equal(f.records.list(f.project.id).at(-1)!.status, 'running');
+});
+
+function modificationRequest(f: ReturnType<typeof fixture>): ModificationRepairRequest {
+  const snapshot = f.sources.get(f.project.id);
+  return {
+    ...f.request(),
+    schemaVersion: 2,
+    modification: {
+      workflowId: randomUUID(),
+      sourceRevision: snapshot.revision,
+      sourceHash: sourceHash(JSON.stringify(snapshot)),
+      instruction: '保留加一行为，将按钮名称改为添加',
+    },
+  };
+}
+
+test('v2 repair persists only a canonical intent hash and never repeats a terminal paid request', async (t) => {
+  const f = fixture(t);
+  f.write();
+  const input = modificationRequest(f);
+  let calls = 0;
+  f.models.toolTurn = async (messages) => {
+    calls++;
+    assert.deepEqual(JSON.parse(messages[2].content!), {
+      type: 'user_modification',
+      ...input.modification,
+    });
+    return turn(f.apply(valid));
+  };
+  const done = await f.runner().repair(input);
+  assert.equal(done.run?.status, 'succeeded');
+  assert.equal(done.run?.requestHash, sourceHash(JSON.stringify(input)));
+  assert.equal(calls, 1);
+  assert.equal(f.journal().includes(input.modification.instruction), false);
+  assert.equal(f.journal().includes(input.modification.workflowId), false);
+  // A post-run source change does not turn same-ID reconciliation into a new operation.
+  f.write(valid + '\n');
+  assert.deepEqual(await f.runner().repair(input), done);
+  assert.equal(calls, 1);
+  for (const modification of [
+    { ...input.modification, instruction: '另一个修改要求' },
+    { ...input.modification, workflowId: randomUUID() },
+    { ...input.modification, sourceHash: '0'.repeat(64) },
+    { ...input.modification, sourceRevision: 0 },
+  ])
+    await assert.rejects(f.runner().repair({ ...input, modification }), hasCode('REPAIR_CONFLICT'));
+  assert.equal(calls, 1);
+});
+
+test('v2 repair rejects malformed or decorated intent before intent, compilation or provider work', async (t) => {
+  const f = fixture(t);
+  f.write();
+  const input = modificationRequest(f);
+  let getters = 0;
+  const accessor = { ...input.modification };
+  Object.defineProperty(accessor, 'instruction', {
+    enumerable: true,
+    get: () => {
+      getters++;
+      return '禁止执行';
+    },
+  });
+  const hidden = { ...input.modification };
+  Object.defineProperty(hidden, 'extra', { enumerable: false, value: 'hidden' });
+  const schemaAccessor = { ...input };
+  Object.defineProperty(schemaAccessor, 'schemaVersion', {
+    enumerable: true,
+    get: () => {
+      getters++;
+      return 2;
+    },
+  });
+  const invalids = [
+    { ...input, modification: null },
+    { ...input, modification: accessor },
+    { ...input, modification: hidden },
+    { ...input, modification: { ...input.modification, [Symbol('extra')]: true } },
+    { ...input, extra: true },
+    schemaAccessor,
+    ...['', 'x'.repeat(2001), '\u0000', '\ud800'].map((instruction) => ({
+      ...input,
+      modification: { ...input.modification, instruction },
+    })),
+    { ...input, modification: { ...input.modification, workflowId: '../bad' } },
+    { ...input, modification: { ...input.modification, sourceHash: 'not-a-hash' } },
+    { ...input, modification: { ...input.modification, sourceRevision: -1 } },
+  ];
+  for (const invalid of invalids)
+    await assert.rejects(f.runner().repair(invalid), hasCode('INVALID_INPUT'));
+  assert.equal(getters, 0);
+  assert.equal(f.records.list(f.project.id).length, 0);
+  assert.equal(f.builds.attempts(f.project.id).length, 0);
+});
+
+test('v2 repair requires an existing same-plan original source checkpoint with the exact hash', async (t) => {
+  const f = fixture(t);
+  f.write();
+  const input = modificationRequest(f);
+  for (const modification of [
+    { ...input.modification, sourceRevision: 0 },
+    { ...input.modification, sourceRevision: input.sourceRevision + 1 },
+    { ...input.modification, sourceHash: '0'.repeat(64) },
+  ])
+    await assert.rejects(f.runner().repair({ ...input, modification }), hasCode('STALE_SOURCE'));
+  // A newly confirmed plan may not adopt the previous plan's modification base.
+  let project = f.projects.saveRequirements(f.project.id, {
+    ...requirements,
+    summary: '不同确认版本',
+  });
+  project = f.projects.approveRequirements(project.id, project.requirements.at(-1)!.id);
+  project = f.projects.saveDesign(project.id, design);
+  project = f.projects.approveDesign(project.id, project.designs.at(-1)!.id);
+  const plan = f.plans.create({
+    schemaVersion: 1,
+    requestId: randomUUID(),
+    projectId: project.id,
+    requirementId: project.requirements.at(-1)!.id,
+    designId: project.designs.at(-1)!.id,
+    profile: 'web',
+  }).run!;
+  await assert.rejects(f.runner().repair({ ...input, planRunId: plan.id }), hasCode('STALE_PLAN'));
+  assert.equal(f.records.list(f.project.id).length, 0);
+});
+
+test('v2 repair runs the trusted credential guard before saving intent or compiling', async (t) => {
+  const f = fixture(t);
+  f.write();
+  const input = modificationRequest(f);
+  let scans = 0;
+  const runner = f.runner({
+    assertModificationSafe: (text) => {
+      scans++;
+      assert.equal(text, input.modification.instruction);
+      throw new AppError('EXPORT_SENSITIVE', 'Synthetic secret detail must not be forwarded');
+    },
+  });
+  await assert.rejects(
+    runner.repair(input),
+    (error: unknown) =>
+      error instanceof AppError &&
+      error.code === 'MODIFICATION_SENSITIVE' &&
+      !error.message.includes('Synthetic'),
+  );
+  assert.equal(scans, 1);
+  assert.equal(f.records.list(f.project.id).length, 0);
+  assert.equal(f.builds.attempts(f.project.id).length, 0);
 });
 
 test('an external source transaction during a model round is detected before executing a returned tool', async (t) => {
