@@ -428,3 +428,12 @@ D-039审查补充：正在修复修改→有限修复阶段遗漏用户要求的
 ### 2026-10-05 D-040 GitHub上传与公开开始
 
 执行者Codex及public_upload_audit/release_archive，实际开始2026-10-05。用户授权先上传0.19.0，再公开现有仓库。已通过GitHub读取核对仓库为private、调用账号有ADMIN权限，远端main与本地旧HEAD fd80130752d9885c3c413f2231c86c378eac2416一致、标签0.15.0存在且无Release。开始核对入库内容及历史，整理现有Mac ZIP；尚未提交/推送/创建Release或变更可见性。产品任务仍7进行中/8待验证/6未开始，Windows延后。
+
+
+### 2026-10-05 D-040 GitHub上传与公开完成
+
+执行者Codex及public_upload_audit/release_archive，实际完成2026-10-05。源码提交b8ac49bc1118f45f55fac5e34b7c72f561ebdaf7及0.19.0标签已上传；343文件共3,831,375字节，213工程全部与受测哈希一致。旧main/0.15.0可达历史及新增内容扫描未发现确认的真实凭据/私人数据；只推送main与新标签，无历史重写或本地Codex refs上传。
+
+Mac ZIP 128.63MiB已作为[0.19.0 Release](https://github.com/Candelor0/product-factory/releases/tag/0.19.0)附件上传，另附SHA256和使用说明；独立解压核对262文件/14链接/314目录，远端三附件大小/哈希一致。修正GitHub自动替换中文附件名造成的初次核对失败；单次远端Git查询超时后通过API验证真实提交。
+
+完成源码、标签和附件上传核对后，[仓库](https://github.com/Candelor0/product-factory)已改为公开；实际isPrivate=false、description=0.19.0、匿名API可读。工程版本不变，本轮没有产品测试/真实模型/签名公证或干净环境新结论，任务仍7进行中/8待验证/6未开始、Windows延后。交接文档随main维护，详见[会话13](sessions/2026-10-05-13.md)和[报告](evidence/2026-10-05/S0-01/github-public/result.md)。

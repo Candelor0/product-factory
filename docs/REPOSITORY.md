@@ -1,8 +1,8 @@
 # 仓库说明
 
-版本：0.19.0。按用户确认的D-040，将当前版本同步GitHub，完成上传后公开现有仓库；实际执行结果见[本轮记录](sessions/2026-10-05-13.md)。当前按D-037优先Mac版与核心功能，Windows发布延后。
+版本：0.19.0。源码、版本标签和Mac Release附件已上传，仓库已按D-040公开；实际执行结果见[本轮记录](sessions/2026-10-05-13.md)。当前按D-037优先Mac版与核心功能，Windows发布延后。
 
-GitHub：[Candelor0/product-factory](https://github.com/Candelor0/product-factory)。默认分支main，可见性以GitHub实际设置和本轮记录为准。
+GitHub：[Candelor0/product-factory](https://github.com/Candelor0/product-factory)。公开仓库，默认分支main。源码提交b8ac49bc1118f45f55fac5e34b7c72f561ebdaf7对应标签0.19.0；后续交接文档随main维护。
 
 ## 保存范围
 
