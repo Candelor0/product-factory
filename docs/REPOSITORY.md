@@ -2,6 +2,8 @@
 
 版本：0.15.0。
 
+GitHub：[Candelor0/product-factory](https://github.com/Candelor0/product-factory)。私有仓库，默认分支main。
+
 ## 保存范围
 
 仓库保存产品工厂源码、测试、构建脚本、依赖锁、第三方许可、需求/设计/任务文档，以及验证报告摘要和源码哈希清单。
