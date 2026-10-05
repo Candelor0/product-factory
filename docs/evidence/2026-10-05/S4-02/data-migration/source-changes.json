@@ -1,0 +1,39 @@
+{
+  "baseline": "docs/evidence/2026-10-05/S4-03/data-backup/source-sha256.json",
+  "modified": [
+    "package-lock.json",
+    "package.json",
+    "src/main/app-data-service.ts",
+    "src/main/app-data-store.ts",
+    "src/main/app.ts",
+    "src/main/coding-tool-schema.ts",
+    "src/main/data-backup-protocol.ts",
+    "src/main/data-backup-service.ts",
+    "src/main/export-archive.ts",
+    "src/main/preload.ts",
+    "src/main/source-compiler.ts",
+    "src/renderer/PlanPanel.tsx",
+    "src/renderer/api.ts",
+    "src/shared/contracts.ts",
+    "templates/export/README.md",
+    "tests/app-data-store.test.ts",
+    "tests/data-backup-protocol.test.ts",
+    "tests/data-backup-service.test.ts",
+    "tests/source-compiler.test.ts"
+  ],
+  "added": [
+    "scripts/data-migration-smoke.mjs",
+    "src/main/data-migration-service.ts",
+    "src/main/data-migration-smoke.ts",
+    "src/main/data-schema-protocol.ts",
+    "src/renderer/DataMigrationPanel.tsx",
+    "src/renderer/data-migration.css",
+    "src/shared/data-migration-contracts.ts",
+    "src/shared/data-schema-contracts.ts",
+    "tests/app-data-schema-store.test.ts",
+    "tests/data-migration-service.test.ts",
+    "tests/data-schema-protocol.test.ts"
+  ],
+  "removed": [],
+  "total": 186
+}

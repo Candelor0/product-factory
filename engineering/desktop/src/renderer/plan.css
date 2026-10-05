@@ -1,0 +1,311 @@
+.project-tabs {
+  flex-wrap: wrap;
+  row-gap: 0;
+}
+.plan-panel,
+.runtime-panel {
+  color: var(--ink, #24272b);
+}
+.tool-panel-heading,
+.tool-panel-title {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+.tool-panel-heading {
+  justify-content: space-between;
+  flex-wrap: wrap;
+}
+.tool-panel-title h2 {
+  font-size: 20px;
+  font-weight: 600;
+  letter-spacing: -0.4px;
+}
+.plan-status,
+.runtime-status {
+  color: var(--muted, #73736c);
+  font-size: 12px;
+  line-height: 1.6;
+  white-space: nowrap;
+}
+.plan-status.is-stale {
+  color: var(--accent, #b7472d);
+}
+.plan-basis,
+.plan-execution-note,
+.runtime-introduction,
+.runtime-lifecycle-note {
+  font-size: 13px;
+  line-height: 1.8;
+  color: var(--muted, #73736c);
+}
+.plan-basis,
+.runtime-introduction {
+  margin-top: -7px;
+}
+.plan-execution-note {
+  padding: 10px 14px;
+  border-left: 2px solid var(--line, #e2e0da);
+  background: var(--soft, #f2f1ec);
+}
+.plan-notice {
+  flex-wrap: wrap;
+  gap: 12px;
+}
+.plan-notice > span {
+  flex: 1 1 260px;
+}
+.plan-notice > button {
+  flex-shrink: 0;
+}
+.plan-summary p {
+  margin: 0 0 7px;
+  font-size: 15px;
+  line-height: 1.85;
+}
+.plan-summary > span {
+  color: var(--muted, #73736c);
+  font-size: 12px;
+  line-height: 1.8;
+}
+.plan-task-groups {
+  display: flex;
+  flex-direction: column;
+  border-top: 1px solid var(--line, #e2e0da);
+}
+.plan-task-group {
+  border-bottom: 1px solid var(--line, #e2e0da);
+}
+.plan-group-heading {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 17px 0;
+  list-style: none;
+  cursor: pointer;
+}
+.plan-group-heading::-webkit-details-marker {
+  display: none;
+}
+.plan-group-heading > svg {
+  flex-shrink: 0;
+  color: var(--muted, #73736c);
+  transition: transform 0.15s;
+}
+.plan-task-group[open] .plan-group-heading > svg {
+  transform: rotate(90deg);
+}
+.plan-group-heading h3,
+.plan-questions h3,
+.plan-review h3 {
+  margin: 0;
+  font-size: 14px;
+  font-weight: 600;
+  line-height: 1.7;
+}
+.plan-group-heading > span {
+  margin-left: auto;
+  color: var(--muted, #73736c);
+  font-size: 12px;
+}
+.plan-task-group ul {
+  margin: 0;
+  padding: 0 0 14px 25px;
+  list-style: none;
+}
+.plan-task-group li {
+  padding: 7px 0;
+}
+.plan-task-group li p {
+  margin: 0;
+  font-size: 14px;
+  line-height: 1.85;
+  overflow-wrap: anywhere;
+}
+.plan-empty {
+  color: var(--muted, #73736c);
+  font-size: 13px;
+  line-height: 1.8;
+}
+.plan-task-group > .plan-empty {
+  margin: 0 0 18px 25px;
+}
+.plan-questions {
+  padding: 18px 20px;
+  border-left: 2px solid var(--accent, #b7472d);
+  background: var(--accent-soft, #f7e9e3);
+}
+.plan-questions > p {
+  margin: 6px 0 0;
+  color: var(--muted, #73736c);
+  font-size: 13px;
+  line-height: 1.8;
+}
+.plan-review {
+  padding: 0 0 4px;
+}
+.plan-questions ul,
+.plan-review ul {
+  padding-left: 19px;
+  margin: 12px 0 0;
+  font-size: 14px;
+  line-height: 1.85;
+}
+.plan-questions li + li,
+.plan-review li + li {
+  margin-top: 6px;
+}
+.plan-advanced {
+  border-top: 1px solid var(--line, #e2e0da);
+}
+.plan-advanced > summary {
+  padding: 17px 0;
+  cursor: pointer;
+  font-size: 13px;
+  color: var(--muted, #73736c);
+}
+.plan-group-heading:focus-visible,
+.plan-advanced > summary:focus-visible {
+  outline: 2px solid var(--accent, #b7472d);
+  outline-offset: 4px;
+}
+.plan-advanced-content {
+  padding: 0 0 20px;
+  color: var(--muted, #73736c);
+  font-size: 13px;
+  line-height: 1.85;
+  overflow-wrap: anywhere;
+}
+.plan-advanced-content section {
+  border-top: 1px solid var(--line, #e2e0da);
+  margin-top: 20px;
+  padding-top: 16px;
+}
+.plan-advanced-content h4 {
+  margin: 0 0 9px;
+  color: var(--ink, #24272b);
+  font-size: 14px;
+  font-weight: 600;
+}
+.plan-advanced-content p {
+  margin: 8px 0;
+}
+.plan-advanced-content ul,
+.plan-advanced-content ol {
+  padding-left: 21px;
+  margin: 8px 0;
+}
+.plan-advanced-content li + li {
+  margin-top: 8px;
+}
+.plan-profile-field {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+  flex-wrap: wrap;
+  color: var(--ink, #24272b);
+}
+.plan-profile-field select {
+  width: auto;
+  padding: 8px 12px;
+  border: 1px solid var(--line, #e2e0da);
+  border-radius: 6px;
+  background: var(--paper, #fff);
+  font: inherit;
+  color: inherit;
+  min-width: 180px;
+}
+.plan-profile-change {
+  color: var(--accent, #b7472d);
+}
+.plan-component-list strong,
+.plan-source-list strong {
+  color: var(--ink, #24272b);
+  font-weight: 500;
+}
+.plan-component-list p {
+  margin: 2px 0;
+}
+.plan-component-list small {
+  font-size: 12px;
+}
+.plan-source-list span {
+  display: block;
+  font-size: 12px;
+}
+.plan-provenance {
+  margin: 14px 0 0;
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  gap: 7px 17px;
+  font-size: 12px;
+}
+.plan-provenance dd {
+  margin: 0;
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+}
+.runtime-status {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+}
+.runtime-status > span {
+  width: 6px;
+  height: 6px;
+  background: #b0afa8;
+  border-radius: 50%;
+}
+.runtime-status.is-running > span {
+  background: #5b715d;
+}
+.runtime-sample {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 24px;
+  padding: 27px 0;
+  border-block: 1px solid var(--line, #e2e0da);
+}
+.runtime-sample-heading {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+.runtime-sample-icon {
+  display: grid;
+  place-items: center;
+  width: 48px;
+  height: 56px;
+  border: 1px solid var(--line, #e2e0da);
+  border-radius: 4px;
+  background: var(--paper, #fff);
+}
+.runtime-sample-heading h3 {
+  font-size: 16px;
+  font-weight: 600;
+  margin: 0 0 6px;
+}
+.runtime-sample-heading p {
+  font-size: 13px;
+  color: var(--muted, #73736c);
+}
+.runtime-sample-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 9px;
+}
+@media (max-width: 900px) {
+  .plan-provenance {
+    grid-template-columns: 1fr;
+    gap: 4px;
+  }
+  .plan-provenance dd {
+    margin-bottom: 8px;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .plan-group-heading > svg {
+    transition: none;
+  }
+}

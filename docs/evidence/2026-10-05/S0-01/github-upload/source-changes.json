@@ -1,0 +1,11 @@
+{
+  "baseline": "docs/evidence/2026-10-05/S4-02/data-migration/source-sha256.json",
+  "modified": [
+    "package.json",
+    "scripts/package-mac.mjs",
+    "src/renderer/App.tsx"
+  ],
+  "added": [],
+  "removed": [],
+  "total": 186
+}

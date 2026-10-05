@@ -1,0 +1,107 @@
+.data-migration-panel {
+  border-bottom: 1px solid var(--line);
+  padding-bottom: 20px;
+  min-width: 0;
+  font-size: 13px;
+}
+.data-migration-details > summary {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 9px;
+  cursor: pointer;
+  list-style: none;
+}
+.data-migration-details > summary::-webkit-details-marker {
+  display: none;
+}
+.data-migration-details[open] > summary .data-migration-chevron {
+  transform: rotate(90deg);
+}
+.data-migration-details > summary:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 4px;
+}
+.data-migration-content {
+  padding-top: 14px;
+}
+.data-migration-content p {
+  margin: 10px 0;
+  line-height: 1.75;
+  overflow-wrap: anywhere;
+}
+.data-migration-actions {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-top: 16px;
+}
+.data-migration-impact {
+  margin-top: 20px;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  padding: 20px;
+}
+.data-migration-impact h4 {
+  margin: 0 0 16px;
+}
+.data-migration-meta {
+  margin: 12px 0;
+}
+.data-migration-meta > div {
+  display: grid;
+  grid-template-columns: 100px minmax(0, 1fr);
+  gap: 14px;
+  padding: 5px 0;
+}
+.data-migration-meta dt {
+  color: var(--muted);
+}
+.data-migration-meta dd {
+  margin: 0;
+  overflow-wrap: anywhere;
+}
+.data-migration-changes {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 16px;
+  margin: 18px 0;
+}
+.data-migration-changes strong {
+  font-size: 12px;
+  font-weight: 500;
+}
+.data-migration-changes ul {
+  margin: 10px 0;
+  padding-left: 18px;
+  max-height: 150px;
+  overflow: auto;
+  overflow-wrap: anywhere;
+}
+.data-migration-changes li {
+  margin-bottom: 5px;
+}
+.data-migration-warning {
+  color: var(--accent);
+}
+.data-migration-confirm-label {
+  flex-direction: row;
+  align-items: flex-start;
+  gap: 10px;
+  margin-top: 20px;
+}
+.data-migration-confirm-label input {
+  flex: 0 0 auto;
+  width: 16px;
+  height: 16px;
+  margin: 3px 0 0;
+}
+@media (max-width: 1100px) {
+  .data-migration-impact {
+    padding: 16px;
+  }
+  .data-migration-changes {
+    gap: 12px;
+  }
+}

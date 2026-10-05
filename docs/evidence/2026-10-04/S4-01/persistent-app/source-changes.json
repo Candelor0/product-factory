@@ -1,0 +1,43 @@
+{
+  "previousCount": 117,
+  "currentCount": 130,
+  "added": [
+    "scripts/app-data-preview-electron.ts",
+    "scripts/app-data-preview-smoke.mjs",
+    "scripts/app-data-smoke.mjs",
+    "src/main/app-data-protocol.ts",
+    "src/main/app-data-sdk.ts",
+    "src/main/app-data-service.ts",
+    "src/main/app-data-store.ts",
+    "src/shared/app-data-contracts.ts",
+    "tests/app-data-electron-smoke.ts",
+    "tests/app-data-protocol.test.ts",
+    "tests/app-data-sdk.test.ts",
+    "tests/app-data-service.test.ts",
+    "tests/app-data-store.test.ts"
+  ],
+  "changed": [
+    "package-lock.json",
+    "package.json",
+    "src/main/app.ts",
+    "src/main/coding-tool-schema.ts",
+    "src/main/generated-preview.ts",
+    "src/main/preload.ts",
+    "src/main/runtime-service.ts",
+    "src/main/runtime-store.ts",
+    "src/main/source-compiler.ts",
+    "src/renderer/App.tsx",
+    "src/renderer/BuildPanel.tsx",
+    "src/renderer/CodingPanel.tsx",
+    "src/renderer/PlanPanel.tsx",
+    "src/renderer/RuntimePanel.tsx",
+    "src/renderer/api.ts",
+    "src/renderer/coding.css",
+    "src/shared/contracts.ts",
+    "src/shared/runtime-contracts.ts",
+    "tests/runtime-service.test.ts",
+    "tests/runtime-store.test.ts",
+    "tests/source-compiler.test.ts"
+  ],
+  "removed": []
+}

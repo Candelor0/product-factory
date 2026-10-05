@@ -1,0 +1,41 @@
+{
+  "baselineVersion": "0.11.0",
+  "version": "0.12.0",
+  "baselineFiles": 130,
+  "currentFiles": 149,
+  "modified": [
+    "package-lock.json",
+    "package.json",
+    "scripts/build-main.mjs",
+    "scripts/package-mac.mjs",
+    "src/main/app.ts",
+    "src/main/model-service.ts",
+    "src/main/preload.ts",
+    "src/renderer/CodingPanel.tsx",
+    "src/renderer/api.ts",
+    "src/renderer/coding.css",
+    "src/shared/contracts.ts"
+  ],
+  "added": [
+    "scripts/build-export-kit.mjs",
+    "scripts/export-smoke.mjs",
+    "src/main/export-archive.ts",
+    "src/main/export-kit.ts",
+    "src/main/export-security.ts",
+    "src/main/export-service.ts",
+    "src/renderer/ExportPanel.tsx",
+    "src/shared/export-contracts.ts",
+    "templates/export/LICENSES.md",
+    "templates/export/README.md",
+    "templates/export/scripts/build.mjs",
+    "templates/export/scripts/files.mjs",
+    "templates/export/scripts/verify.mjs",
+    "tests/export-archive.test.ts",
+    "tests/export-electron-smoke.ts",
+    "tests/export-kit-loader.test.ts",
+    "tests/export-kit.test.ts",
+    "tests/export-security.test.ts",
+    "tests/export-service.test.ts"
+  ],
+  "removed": []
+}

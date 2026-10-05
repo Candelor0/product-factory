@@ -1,0 +1,97 @@
+.app-ai-panel {
+  border-bottom: 1px solid var(--line);
+  padding-bottom: 20px;
+  min-width: 0;
+  font-size: 13px;
+}
+.app-ai-details > summary {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 9px;
+  cursor: pointer;
+  list-style: none;
+}
+.app-ai-details > summary::-webkit-details-marker {
+  display: none;
+}
+.app-ai-details[open] > summary .app-ai-chevron {
+  transform: rotate(90deg);
+}
+.app-ai-details > summary:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 4px;
+}
+.app-ai-content {
+  padding-top: 14px;
+}
+.app-ai-content p {
+  margin: 10px 0;
+  line-height: 1.75;
+  overflow-wrap: anywhere;
+}
+.app-ai-connections,
+.app-ai-usage {
+  margin: 18px 0;
+}
+.app-ai-connections > div,
+.app-ai-usage > div {
+  display: grid;
+  grid-template-columns: minmax(150px, 1fr) minmax(0, 2fr);
+  gap: 14px;
+  padding: 6px 0;
+}
+.app-ai-connections dt,
+.app-ai-usage dt {
+  color: var(--muted);
+}
+.app-ai-connections dd,
+.app-ai-usage dd {
+  margin: 0;
+  overflow-wrap: anywhere;
+}
+.app-ai-connections dd > span {
+  display: block;
+  margin-top: 3px;
+  font-size: 12px;
+  color: var(--muted);
+}
+.app-ai-form {
+  display: grid;
+  gap: 16px;
+  margin-top: 20px;
+}
+.app-ai-form > .button {
+  justify-self: start;
+}
+.app-ai-limits {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 18px;
+}
+.app-ai-form input,
+.app-ai-form textarea {
+  width: 100%;
+}
+.app-ai-warning {
+  color: var(--accent);
+}
+.app-ai-consent {
+  color: var(--muted);
+  font-size: 12px;
+}
+.app-ai-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px;
+}
+.app-ai-revoke {
+  margin-top: 14px;
+}
+@media (max-width: 1100px) {
+  .app-ai-connections > div,
+  .app-ai-usage > div {
+    grid-template-columns: 170px minmax(0, 1fr);
+  }
+}

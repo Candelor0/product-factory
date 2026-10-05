@@ -1,0 +1,357 @@
+.coding-panel {
+  border-block: 1px solid var(--line);
+  padding: 26px 0;
+}
+.build-panel {
+  margin-top: 24px;
+  padding-top: 24px;
+  border-top: 1px solid var(--line);
+}
+.build-panel > p {
+  margin: 12px 0 0;
+}
+.build-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px;
+  margin-top: 16px;
+}
+.build-actions > span {
+  margin-right: auto;
+}
+.build-panel .error-box {
+  margin-top: 16px;
+  font-size: 13px;
+}
+.build-panel ul {
+  margin: 10px 0 0;
+  padding-left: 20px;
+}
+.build-warnings {
+  margin-top: 14px;
+  font-size: 12px;
+  color: var(--muted);
+}
+.coding-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 24px;
+}
+.coding-heading h3 {
+  margin: 0 0 7px;
+  font-size: 17px;
+  font-weight: 550;
+}
+.coding-heading p {
+  margin: 0;
+  color: var(--muted);
+  font-size: 13px;
+}
+.coding-panel > p {
+  margin: 12px 0 0;
+}
+.coding-progress {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 20px;
+  font-size: 13px;
+  margin-top: 20px;
+}
+.coding-progress .small {
+  flex-basis: 100%;
+}
+.coding-files {
+  margin-top: 20px;
+}
+.coding-files summary {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  font-size: 13px;
+}
+.coding-browser {
+  display: grid;
+  grid-template-columns: 190px minmax(0, 1fr);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  margin-top: 14px;
+  overflow: hidden;
+}
+.coding-browser nav {
+  padding: 8px;
+  background: var(--paper);
+  border-right: 1px solid var(--line);
+  max-height: 400px;
+  overflow: auto;
+}
+.coding-browser nav button {
+  display: block;
+  width: 100%;
+  text-align: left;
+  overflow-wrap: anywhere;
+  border: 0;
+  background: transparent;
+  padding: 9px 8px;
+  font-size: 12px;
+  color: var(--muted);
+  cursor: pointer;
+  border-radius: 4px;
+}
+.coding-browser nav button.selected {
+  background: var(--soft);
+  color: var(--ink);
+}
+.coding-viewer {
+  min-width: 0;
+  padding: 16px;
+}
+.coding-viewer > p {
+  font-size: 12px;
+  color: var(--muted);
+  margin: 0 0 12px;
+}
+.coding-viewer pre {
+  margin: 0;
+  font-size: 12px;
+  line-height: 1.65;
+  overflow: auto;
+  max-height: 360px;
+  tab-size: 2;
+}
+@media (max-width: 1100px) {
+  .coding-browser {
+    grid-template-columns: 155px minmax(0, 1fr);
+  }
+}
+.repair-panel {
+  margin-top: 16px;
+}
+.repair-entry {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+.repair-panel details {
+  width: 100%;
+}
+.repair-panel summary {
+  cursor: pointer;
+}
+.repair-panel li {
+  overflow-wrap: anywhere;
+}
+.recovery-panel {
+  margin-top: 22px;
+  font-size: 13px;
+  min-width: 0;
+}
+.recovery-history > summary {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  list-style: none;
+}
+.recovery-history > summary::-webkit-details-marker {
+  display: none;
+}
+.recovery-history[open] > summary .recovery-chevron {
+  transform: rotate(90deg);
+}
+.recovery-content {
+  padding-top: 8px;
+}
+.checkpoint-list {
+  list-style: none;
+  margin: 16px 0 0;
+  padding: 0;
+  max-height: 400px;
+  overflow: auto;
+}
+.checkpoint-list > li {
+  border-top: 1px solid var(--line);
+  padding: 14px 2px;
+}
+.checkpoint-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+}
+.checkpoint-meta {
+  min-width: 0;
+  display: grid;
+  gap: 6px;
+}
+.checkpoint-meta strong,
+.recovery-interrupted strong {
+  font-weight: 550;
+}
+.checkpoint-row .button {
+  flex-shrink: 0;
+}
+.checkpoint-files {
+  margin-top: 10px;
+  color: var(--muted);
+  font-size: 12px;
+}
+.checkpoint-files summary {
+  cursor: pointer;
+}
+.checkpoint-files li,
+.recovery-panel code {
+  overflow-wrap: anywhere;
+}
+.recovery-confirm,
+.recovery-interrupted {
+  border-left: 2px solid var(--line);
+  padding-left: 16px;
+  margin: 20px 0;
+}
+.recovery-confirm h4 {
+  margin: 0 0 10px;
+  font-size: 14px;
+  font-weight: 550;
+}
+.recovery-confirm p,
+.recovery-interrupted p {
+  margin: 8px 0;
+  line-height: 1.7;
+}
+.recovery-diff {
+  margin: 12px 0;
+  padding: 0;
+  list-style: none;
+  max-height: 220px;
+  overflow: auto;
+}
+.recovery-diff li {
+  display: flex;
+  gap: 12px;
+  margin: 6px 0;
+  font-size: 12px;
+}
+.recovery-diff li > span {
+  color: var(--muted);
+  flex-shrink: 0;
+}
+.recovery-actions,
+.recovery-error {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px;
+  margin-top: 16px;
+}
+.recovery-interrupted > ul {
+  list-style: none;
+  margin: 14px 0 0;
+  padding: 0;
+}
+.recovery-interrupted li {
+  display: grid;
+  gap: 6px;
+  margin-top: 14px;
+  line-height: 1.6;
+}
+.recovery-interrupted li > span {
+  color: var(--muted);
+  font-size: 12px;
+}
+.recovery-notice {
+  margin-bottom: 0;
+  line-height: 1.7;
+}
+.export-panel {
+  margin-top: 22px;
+  font-size: 13px;
+  min-width: 0;
+}
+.export-heading {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+.export-heading h4 {
+  margin: 0;
+  font-size: 14px;
+  font-weight: 550;
+}
+.export-panel p {
+  margin: 10px 0;
+  line-height: 1.7;
+  overflow-wrap: anywhere;
+}
+.export-result summary {
+  cursor: pointer;
+  color: var(--muted);
+  font-size: 12px;
+}
+.export-result details p {
+  font-size: 12px;
+  color: var(--muted);
+}
+.runtime-feedback {
+  margin-top: 22px;
+  border-top: 1px solid var(--line);
+  padding-top: 18px;
+  font-size: 13px;
+}
+.application-panel {
+  margin-top: 22px;
+  border-top: 1px solid var(--line);
+  padding-top: 18px;
+  font-size: 13px;
+}
+.application-panel h4 {
+  margin: 0;
+  font-size: 14px;
+  font-weight: 550;
+}
+.application-panel p {
+  margin: 10px 0;
+  line-height: 1.7;
+}
+.application-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px;
+}
+.runtime-feedback-heading {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+.runtime-feedback h4 {
+  font-size: 14px;
+  font-weight: 550;
+  margin: 0;
+}
+.runtime-feedback > p,
+.runtime-observation > p {
+  margin: 10px 0;
+  line-height: 1.7;
+}
+.runtime-observation {
+  margin: 16px 0;
+}
+.runtime-observation ul {
+  line-height: 1.8;
+}
+@media (max-width: 1100px) {
+  .checkpoint-row {
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 12px;
+  }
+}
